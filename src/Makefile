@@ -1,75 +1,33 @@
-UNAME := $(shell uname)
-ifeq ($(UNAME), Linux)
-    CC = gcc
-	CFLAGS := -std=c11 -lcheck -lsubunit -pthread -lrt -lm -Wall -Werror -Wpedantic
-else
-    CC = gcc
-	CFLAGS :=  -Wall -Werror -Wextra -std=c11 
-endif
+CPP= gcc -Wall -Werror -Wextra -std=c++20
+CC= gcc -Wall -Werror -Wextra -std=c11
 
-TESTFLAGS = -lcheck
-GCOVFLAGS = -fprofile-arcs -ftest-coverage
+all: install run
 
-OBJS := out/main.o out/frontend.o out/backend.o
+install: uninstall clean frontend backend main.o
+	$(CPP) main.o frontend_tetris.o backend_tetris.a frontend_snake.o backend_snake.a -lncurses -lstdc++ -o bin/game
+	rm -rf *.o *.a 
 
-
-.PHONY: all install uninstall clean dvi dist
-
-all: install dist
-
-tetris: $(OBJS)
-	$(CC) $^ -o build/$@ $(CFLAGS) -lncurses
-
-out/%.o: ./%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-out/%.o: gui/cli/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-out/%.o: brick_game/tetris/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-clean: uninstall
-	$(RM) out/*.o Tetris_Game.v1.tar.gz
-	@rm -rf *.gcno *gcda *.gcov gcov
-	@rm -rf report report.info
-	@rm -rf *.dSYM
-	@rm -rf *.o *.a test
-	@rm -f score.txt
-	@rm -f tests/test.o brick_game/tetris/*.o
-
-
-folder_out:
-	mkdir -p out
-	mkdir -p build
-
-install: folder_out tetris
+run: install
+	./bin/game
 
 uninstall:
-	rm -rf build
+	rm -rf bin/game
 
-dvi:
-	open dvi.md
+clean: uninstall
+	rm -rf *.o *.a *.gcda *.gcdo *.gcno  report *.tar *.out bin/desk
 
-dist:
-	tar -cvf Tetris_Game.v1.tar.gz brick_game gui main.c defines.h makefile
+frontend:
+	$(CPP) -c ./gui/cli/frontend_s.cpp -o frontend_snake.o
+	$(CC) -c ./gui/cli/frontend.c -o frontend_tetris.o
 
-run: 
-	cd build && ./tetris
+backend:
+	$(CPP) -c ./brick_game/snake/backend_s.cpp -o backend_snake.o
+	ar rcs backend_snake.a backend_snake.o
+	ranlib backend_snake.a
+	$(CC) -c ./brick_game/tetris/backend.c -o backend_tetris.o
+	ar rcs backend_tetris.a backend_tetris.o
+	ranlib backend_tetris.a
 
-style_check:
-	clang-format --style=google -n $$(find . -type f -name "*.c" -print0 | xargs -0)
-	clang-format --style=google -n $$(find . -type f -name "*.h" -print0 | xargs -0)
 
-style_correction:
-	clang-format --style=google -i $$(find . -type f -name "*.c" -print0 | xargs -0)
-	clang-format --style=google -i $$(find . -type f -name "*.h" -print0 | xargs -0)
-
-test:
-	$(CC) tests/test.c brick_game/tetris/backend.c -o $@ $(CFLAGS) -lncurses $(TESTFLAGS) $(GCOVFLAGS)
-	./test
-
-gcov_report: test
-	@lcov -t "./gcov" -o report.info --no-external -c -d .
-	@genhtml -o report report.info
-	@open ./report/index.html
+main.o:
+	$(CPP) -c main.cpp -o main.o
