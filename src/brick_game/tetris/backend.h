@@ -5,13 +5,19 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "../../defines.h"
+#include "../../gui/cli/frontend.h"
+#include "defines.h"
 
 typedef struct {
   tetris_t *figure;
   Field *field;
 } params_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Model
 void move_up(params_t *params);
 void move_down(params_t *params);
 void move_left(params_t *params);
@@ -38,5 +44,14 @@ void clean_field(Field *field);
 void game_settings(Field *field);
 int get_high_score();
 void set_high_score(int score);
+
+// Controller
+int game_start(int u);
+int welcome_page();
+int reply();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // SRC_BRICK_GAME_TETRIS_BACKEND_H_

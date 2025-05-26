@@ -95,5 +95,5 @@ int game_start_info(int row, int col) {
 }
 void game_over_info() {
   mvprintw(0, 0, "Press ENTER to reply");
-  mvprintw(1, 0, "Press q to exit");
+  mvprintw(1, 0, "Press 'q' to exit");
 }
