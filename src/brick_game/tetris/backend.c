@@ -1,7 +1,6 @@
 #include "backend.h"
 
 typedef void (*Action)(params_t *params);
-
 Action actions[8] = {move_up,   move_down,  move_left, move_right,
                      game_over, pause_game, NULL,      NULL};
 
@@ -270,8 +269,8 @@ void check_fild(Field *field) {
     }
   }
   for (int i = 2; i <= current; i++) {
-    for (int j = from; j < to; j++) {
-      field->screen[current][j] = 0;
+    for (int i = from; i < to; i++) {
+      field->screen[current][i] = 0;
     }
   }
   field->score += score_table(cnt);
@@ -342,7 +341,7 @@ void clean_field(Field *field) {
 
 int get_high_score() {
   int score = 0;
-  FILE *file = fopen("brick_game/tetris/highscore.txt", "r");
+  FILE *file = fopen("score.txt", "r");
   if (file == NULL) {
     score = 0;
   } else {
@@ -353,67 +352,7 @@ int get_high_score() {
 }
 
 void set_high_score(int score) {
-  FILE *file = fopen("brick_game/tetris/highscore.txt", "w");
+  FILE *file = fopen("score.txt", "w");
   fprintf(file, "%d", score);
   fclose(file);
-}
-
-int welcome_page() {
-  int flag = 2;
-  int row, col;
-  getmaxyx(stdscr, row, col);
-  game_start_info(row, col);
-  while (flag == 2) {
-    int signal = get_signal(getch());
-    if (signal == START)
-      flag = 1;
-    else if (signal == TERMINATE) {
-      flag = 0;
-    }
-    napms(100);
-  }
-  return flag;
-}
-
-int game_start(int u) {
-  raw();
-  nodelay(stdscr, TRUE);
-  clear();
-  srand(time(NULL));
-  if (u == 0 && welcome_page() == 0) {
-  } else {
-    int r = rand() % 7;
-    r = rand() % 7;
-    tetris_t figure = FIGURE.type[r];
-    Field field = init_field();
-    while (field.game_is_on == 1) {
-      int seconds = field.speed;
-      do {
-        seconds -= 10;
-        napms(10);
-        updateCurrentState(field, figure);
-        int signal = get_signal(getch());
-        sigact(signal, &figure, &field);
-      } while (seconds > 0);
-      sigact(MOVE_DOWN, &figure, &field);
-    }
-    clean_field(&field);
-    if (reply()) game_start(1);
-  }
-  return 0;
-}
-
-int reply() {
-  int flag = 1;
-  while (flag == 1) {
-    napms(10);
-    game_over_info();
-    refresh();
-    int signal = get_signal(getch());
-    if (signal == TERMINATE)
-      flag = 0;
-    else if (signal == START)
-      flag = 2;
-  }
-  return flag;
 }

@@ -1,12 +1,8 @@
 #ifndef SRC_GUI_CLI_FRONTEND_H_
 #define SRC_GUI_CLI_FRONTEND_H_
 
-#include "../../brick_game/tetris/defines.h"
+#include "../../defines.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-// View
 void print_rectangle(int top_y, int bottom_y, int left_x, int right_x);
 void print_figure(tetris_t figure);
 void print_tetris_blocks(Field field);
@@ -17,7 +13,4 @@ void game_paused();
 int game_start_info(int row, int col);
 void game_over_info();
 
-#ifdef __cplusplus
-}
-#endif
 #endif  // SRC_GUI_CLI_FRONTEND_H_
